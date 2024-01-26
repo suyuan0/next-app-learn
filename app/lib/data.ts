@@ -9,11 +9,12 @@ import {
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
+import { unstable_noStore as nostore } from 'next/cache';
 
 export async function fetchRevenue() {
   // Add noStore() here to prevent the response from being cached.
   // This is equivalent to in fetch(..., {cache: 'no-store'}).
-
+  nostore();
   try {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
@@ -33,6 +34,7 @@ export async function fetchRevenue() {
 }
 
 export async function fetchLatestInvoices() {
+  nostore();
   try {
     const data = await sql<LatestInvoiceRaw>`
       SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
@@ -45,6 +47,7 @@ export async function fetchLatestInvoices() {
       ...invoice,
       amount: formatCurrency(invoice.amount),
     }));
+
     return latestInvoices;
   } catch (error) {
     console.error('Database Error:', error);
@@ -53,6 +56,7 @@ export async function fetchLatestInvoices() {
 }
 
 export async function fetchCardData() {
+  nostore();
   try {
     // You can probably combine these into a single SQL query
     // However, we are intentionally splitting them to demonstrate
@@ -93,7 +97,7 @@ export async function fetchFilteredInvoices(
   currentPage: number,
 ) {
   const offset = (currentPage - 1) * ITEMS_PER_PAGE;
-
+  nostore();
   try {
     const invoices = await sql<InvoicesTable>`
       SELECT
@@ -125,6 +129,7 @@ export async function fetchFilteredInvoices(
 
 export async function fetchInvoicesPages(query: string) {
   try {
+    nostore();
     const count = await sql`SELECT COUNT(*)
     FROM invoices
     JOIN customers ON invoices.customer_id = customers.id
@@ -145,6 +150,7 @@ export async function fetchInvoicesPages(query: string) {
 }
 
 export async function fetchInvoiceById(id: string) {
+  nostore();
   try {
     const data = await sql<InvoiceForm>`
       SELECT
@@ -188,6 +194,7 @@ export async function fetchCustomers() {
 }
 
 export async function fetchFilteredCustomers(query: string) {
+  nostore();
   try {
     const data = await sql<CustomersTableType>`
 		SELECT
